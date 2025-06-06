@@ -1,31 +1,48 @@
-import { useEffect, useState } from "react";
-import { Box, Container, Grid, Typography } from "@mui/material";
-import api from "../utils/api";
-import { News } from "../types/News";
-import NewsCard from "../components/NewsCard";
+import { Box, CircularProgress } from "@mui/material";
+import MainArticle from "@/components/main-article";
+import SideNews from "@/components/side-news";
+import NewsCarousel from "@/components/news-carousel";
+import { useNews } from "@/hooks/useNews";
 
-export default function HomePage() {
-  const [news, setNews] = useState<News[]>([]);
+export default function Home() {
+  const { news, loading, search, searching, error } = useNews({});
 
-  useEffect(() => {
-    api
-      .get("/news")
-      .then((res) => setNews(res.data))
-      .catch((err) => console.error(err));
-  }, []);
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: "80vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress size={48} />
+      </Box>
+    );
+  }
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Noticias
-      </Typography>
-      <Box display="flex" flexWrap="wrap" gap={2}>
-        {news.map((n) => (
-          <Box key={n.id} flexBasis={{ xs: "100%", sm: "48%", md: "30%" }}>
-            <NewsCard news={n} />
-          </Box>
-        ))}
+    <Box>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
+          gap: 3,
+          mb: 4,
+        }}
+      >
+        <Box>
+          <MainArticle article={news[0]} />
+        </Box>
+        <Box>
+          <SideNews articles={news.slice(1, 5)} />
+        </Box>
       </Box>
-    </Container>
+
+      <Box>
+        <NewsCarousel articles={news.slice(5, 10)} />
+      </Box>
+    </Box>
   );
 }
