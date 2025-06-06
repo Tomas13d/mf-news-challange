@@ -1,15 +1,18 @@
 import { Router } from "express";
 import * as NewsController from "../../controllers/news";
+import { authenticate } from "../../middleware/authMiddleware";
 
 const router = Router();
 router.get("/search", NewsController.search);
 router.get("/category/:category", NewsController.getByCategory);
 
-// CRUD news
+
 router.get("/", NewsController.getAll);
 router.get("/:id", NewsController.getById);
-router.post("/", NewsController.create);
-router.patch("/:id", NewsController.update);
-router.delete("/:id", NewsController.remove);
+
+// 🔒 Rutas protegidas
+router.post("/", authenticate, NewsController.create);
+router.patch("/:id", authenticate, NewsController.update);
+router.delete("/:id", authenticate, NewsController.remove);
 
 export default router;
