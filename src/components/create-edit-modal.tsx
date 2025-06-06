@@ -19,13 +19,16 @@ interface NewsModalProps {
   open: boolean;
   onClose: () => void;
   initialData?: Partial<News>;
+  refetch: () => void;
 }
 
 export default function CreateEditModal({
   open,
   onClose,
   initialData = {},
+  refetch,
 }: NewsModalProps) {
+  const isEditMode = Boolean(initialData?.id);
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -47,8 +50,6 @@ export default function CreateEditModal({
     }),
     onSubmit: async (values, { resetForm }) => {
       try {
-        const isEditMode = Boolean(initialData?.id);
-
         // Convertir fecha a ISO
         const valuesWithFormattedDate = {
           ...values,
@@ -82,9 +83,11 @@ export default function CreateEditModal({
 
           await updateNews(initialData.id as number, updatedFields);
           showSuccess("Noticia actualizada correctamente");
+          refetch();
         } else {
           await createNews(valuesWithFormattedDate);
           showSuccess("Noticia creada exitosamente");
+          refetch();
         }
 
         resetForm();
@@ -129,31 +132,33 @@ export default function CreateEditModal({
         </IconButton>
 
         {/* Botón destacado: Crear noticia con AI */}
-        <Box sx={{ display: "flex" }}>
-          <Button
-            variant="contained"
-            onClick={handleCreateWithAI}
-            sx={{
-              mb: 1,
-              mt: 3,
-              ml: "auto",
-              background: "linear-gradient(to right, #00C6FF, #0072FF)",
-              color: "#fff",
-              fontWeight: "bold",
-              textTransform: "none",
-              transition: "0.3s",
-              boxShadow: "0 4px 10px rgba(0, 114, 255, 0.3)",
-              "&:hover": {
-                background: "linear-gradient(to right, #0097d1, #0054c4)",
-                boxShadow: "0 6px 12px rgba(0, 114, 255, 0.4)",
-              },
-            }}
-            startIcon={<SmartToyIcon />}
-            size="small"
-          >
-            Crear noticia con AI
-          </Button>
-        </Box>
+        {!isEditMode && (
+          <Box sx={{ display: "flex" }}>
+            <Button
+              variant="contained"
+              onClick={handleCreateWithAI}
+              sx={{
+                mb: 1,
+                mt: 3,
+                ml: "auto",
+                background: "linear-gradient(to right, #00C6FF, #0072FF)",
+                color: "#fff",
+                fontWeight: "bold",
+                textTransform: "none",
+                transition: "0.3s",
+                boxShadow: "0 4px 10px rgba(0, 114, 255, 0.3)",
+                "&:hover": {
+                  background: "linear-gradient(to right, #0097d1, #0054c4)",
+                  boxShadow: "0 6px 12px rgba(0, 114, 255, 0.4)",
+                },
+              }}
+              startIcon={<SmartToyIcon />}
+              size="small"
+            >
+              Crear noticia con AI
+            </Button>
+          </Box>
+        )}
 
         <Typography variant="h6" gutterBottom>
           {initialData?.id ? "Editar noticia" : "Crear noticia"}

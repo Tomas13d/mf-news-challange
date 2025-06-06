@@ -8,7 +8,6 @@ import {
   Container,
   IconButton,
   InputBase,
-  Fade,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useRouter } from "next/router";
@@ -17,8 +16,9 @@ import Link from "next/link";
 import { styled, alpha } from "@mui/material/styles";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CreateEditModal from "./create-edit-modal";
 import { useArticleModal } from "@/context/ArticleModalContext";
+import Swal from "sweetalert2";
+import { deleteNews } from "@/services/News";
 
 const SearchContainer = styled("div")(({ theme }) => ({
   position: "relative",
@@ -45,8 +45,9 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 export default function Header() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { id } = router.query;
   const isArticlePage = router.pathname === "/article/[id]";
-  const { closeModal, isOpen, openModal } = useArticleModal();
+  const { openModal } = useArticleModal();
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -62,9 +63,35 @@ export default function Header() {
     }
   };
 
+  const handleDeleteNews = async () => {
+    const result = await Swal.fire({
+      title: "¿Eliminar noticia?",
+      text: "Esta acción no se puede deshacer",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteNews(id as string);
+        Swal.fire(
+          "Eliminada",
+          "La noticia fue eliminada correctamente.",
+          "success"
+        );
+        router.push("/");
+      } catch (err) {
+        Swal.fire("Error", "No se pudo eliminar la noticia.", "error");
+      }
+    }
+  };
+
   return (
     <>
-      <CreateEditModal open={isOpen} onClose={closeModal} />
       <AppBar position="static" sx={{ bgcolor: "#d32f2f" }}>
         <Container maxWidth="lg">
           <Toolbar
@@ -142,22 +169,14 @@ export default function Header() {
                           color: "#b71c1c",
                         },
                       }}
-                      onClick={() => {
-                        const confirm = window.confirm(
-                          "¿Estás seguro que quieres eliminar esta noticia?"
-                        );
-                        if (confirm) {
-                          const id = router.query.id;
-                          // Lógica deleteArticle(id)
-                        }
-                      }}
+                      onClick={handleDeleteNews}
                     >
                       Eliminar
                     </Button>
                   </>
                 ) : (
                   <>
-                   <Button
+                    <Button
                       variant="text"
                       color="secondary"
                       sx={{
@@ -184,7 +203,6 @@ export default function Header() {
                     >
                       Nueva Noticia
                     </Button>
-                   
                   </>
                 )
               ) : (

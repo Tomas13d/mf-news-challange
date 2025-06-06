@@ -14,9 +14,9 @@ import CreateEditModal from "@/components/create-edit-modal";
 
 export default function ArticlePage() {
   const router = useRouter();
-  const { openModal, closeModal, isOpen } = useArticleModal();
   const { id } = router.query;
   const { newsItem, loading, error, refetch } = useNewsItem(id as string);
+  const { closeModal, isOpen } = useArticleModal();
   const [relatedNews, setRelatedNews] = useState<News[]>([]);
 
   useEffect(() => {
@@ -67,6 +67,7 @@ export default function ArticlePage() {
         open={isOpen}
         onClose={closeModal}
         initialData={newsItem}
+        refetch={refetch}
       />
       <Box
         sx={{
