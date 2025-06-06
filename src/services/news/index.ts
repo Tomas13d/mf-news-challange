@@ -1,5 +1,5 @@
 import prisma from "../../prisma/client";
-import { News } from "../../generated/prisma";
+import { News } from "../../../generated/prisma";
 
 // Obtener todas las noticias
 export const getAllNews = () =>
@@ -42,7 +42,7 @@ export const searchNews = (query: string) =>
       OR: [
         { title: { contains: query, mode: "insensitive" } },
         { author: { contains: query, mode: "insensitive" } },
-        {category: {contains: query, mode: "insensitive"}}
+        { category: { contains: query, mode: "insensitive" } },
       ],
     },
     orderBy: {

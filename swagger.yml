@@ -1,0 +1,238 @@
+openapi: 3.0.0
+info:
+  title: API de Noticias y Autenticación
+  version: 1.0.0
+  description: API para autenticación de usuarios y gestión de noticias.
+
+paths:
+
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Registrar nuevo usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, name]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                name:
+                  type: string
+      responses:
+        201:
+          description: Usuario creado exitosamente
+        400:
+          description: Error al registrar el usuario
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Iniciar sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Usuario autenticado
+        401:
+          description: Credenciales incorrectas
+
+  /news:
+    get:
+      tags:
+        - News
+      summary: Obtener todas las noticias
+      responses:
+        200:
+          description: Lista de noticias
+
+    post:
+  tags:
+    - News
+  summary: Crear noticia
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - title
+            - body
+            - imageUrl
+            - author
+            - date
+            - category
+            - summary
+          properties:
+            title:
+              type: string
+              example: "Nuevo descubrimiento en IA"
+            body:
+              type: string
+              example: "Un equipo de investigadores ha desarrollado..."
+            imageUrl:
+              type: string
+              format: uri
+              example: "https://example.com/news-image.jpg"
+            author:
+              type: string
+              example: "Juan Pérez"
+            date:
+              type: string
+              format: date-time
+              example: "2025-06-06T12:00:00Z"
+            category:
+              type: string
+              example: "tecnologia"
+            summary:
+              type: string
+              example: "Un avance importante en inteligencia artificial..."
+  responses:
+    201:
+      description: Noticia creada
+    401:
+      description: No autorizado
+
+  /news/search:
+    get:
+      tags:
+        - News
+      summary: Buscar noticias
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          required: true
+          description: Término de búsqueda
+      responses:
+        200:
+          description: Resultados de búsqueda
+
+  /news/category/{category}:
+    get:
+      tags:
+        - News
+      summary: Obtener noticias por categoría
+      parameters:
+        - in: path
+          name: category
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Lista de noticias por categoría
+        404:
+          description: Categoría no encontrada
+
+  /news/{id}:
+    get:
+      tags:
+        - News
+      summary: Obtener noticia por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Noticia encontrada
+        404:
+          description: Noticia no encontrada
+
+    patch:
+  tags:
+    - News
+  summary: Actualizar noticia
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+      description: ID de la noticia a actualizar
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            title:
+              type: string
+              example: "Título actualizado"
+            body:
+              type: string
+              example: "Contenido modificado de la noticia"
+            imageUrl:
+              type: string
+              format: uri
+              example: "https://example.com/nueva-imagen.jpg"
+            author:
+              type: string
+              example: "Ana Gómez"
+            date:
+              type: string
+              format: date-time
+              example: "2025-06-06T14:00:00Z"
+            category:
+              type: string
+              example: "salud"
+            summary:
+              type: string
+              example: "Resumen actualizado de la noticia"
+  responses:
+    200:
+      description: Noticia actualizada
+    401:
+      description: No autorizado
+
+    delete:
+      tags:
+        - News
+      summary: Eliminar noticia
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        204:
+          description: Noticia eliminada
+        401:
+          description: No autorizado
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

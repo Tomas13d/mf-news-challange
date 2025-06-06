@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -9,18 +9,18 @@ datasource db {
 }
 
 model News {
-  id        Int      @id @default(autoincrement())
-  title     String
-  body      String
-  imageUrl  String
-  author    String
-  date      DateTime
-  category  String
-  summary   String
+  id       Int      @id @default(autoincrement())
+  title    String
+  body     String
+  imageUrl String
+  author   String
+  date     DateTime
+  category String
+  summary  String
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
   name      String
