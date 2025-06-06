@@ -42,6 +42,7 @@ export const searchNews = (query: string) =>
       OR: [
         { title: { contains: query, mode: "insensitive" } },
         { author: { contains: query, mode: "insensitive" } },
+        {category: {contains: query, mode: "insensitive"}}
       ],
     },
     orderBy: {
