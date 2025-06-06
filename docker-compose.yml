@@ -14,7 +14,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   migrate:
-    build: ./mindfactory-news-api
+    build: ./backend
     depends_on:
       - db
     environment:
@@ -22,7 +22,7 @@ services:
     command: npx prisma migrate deploy
 
   seed:
-    build: ./mindfactory-news-api
+    build: ./backend
     depends_on:
       - migrate
     environment:
@@ -30,7 +30,7 @@ services:
     command: npx prisma db seed
 
   backend:
-    build: ./mindfactory-news-api
+    build: ./backend
     ports:
       - "5000:5000"
     environment:
@@ -41,7 +41,7 @@ services:
     command: node dist/index.js
 
   frontend:
-    build: ./mindfactory-news-app
+    build: ./frontend
     ports:
       - "3000:3000"
     environment:
