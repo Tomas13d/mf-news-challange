@@ -59,9 +59,8 @@ export default function ArticlePage() {
     <>
       <CreateEditModal
         open={isOpen}
-        onClose={closeModal}
-        initialData={newsItem}
-        refetch={refetch}
+        handleClose={closeModal} handleRefresh={refetch}
+        editingNews={newsItem}
       />
       <Box
         sx={{

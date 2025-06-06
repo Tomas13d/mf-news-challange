@@ -37,7 +37,7 @@ export default function SearchPage() {
 
   return (
     <>
-      <CreateEditModal open={isOpen} onClose={closeModal} refetch={refetch} />
+      <CreateEditModal open={isOpen} handleClose={closeModal} handleRefresh={refetch}/>
       <Box>
         <Typography variant="h4" mb={2}>
           Resultados de búsqueda para: "{searchQuery}"

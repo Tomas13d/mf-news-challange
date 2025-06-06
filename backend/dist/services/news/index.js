@@ -41,7 +41,7 @@ const searchNews = (query) => client_1.default.news.findMany({
         OR: [
             { title: { contains: query, mode: "insensitive" } },
             { author: { contains: query, mode: "insensitive" } },
-            { category: { contains: query, mode: "insensitive" } }
+            { category: { contains: query, mode: "insensitive" } },
         ],
     },
     orderBy: {

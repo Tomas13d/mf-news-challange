@@ -63,7 +63,7 @@ describe("Auth API", () => {
     describe("POST /register", () => {
         it("debería registrar un usuario exitosamente", () => __awaiter(void 0, void 0, void 0, function* () {
             mockedAuthService.registerUser.mockResolvedValueOnce({
-                id: "4",
+                id: 4,
                 email: "t@g.com",
                 password: "asas",
                 name: "tomas",
@@ -99,7 +99,7 @@ describe("Auth API", () => {
             const date = new Date();
             mockedAuthService.loginUser.mockResolvedValueOnce({
                 user: {
-                    id: "6",
+                    id: 6,
                     email: "t@g.com",
                     name: "tomas",
                     password: "$2b$10$hashedpassword",

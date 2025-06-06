@@ -35,6 +35,7 @@ services:
       - "5000:5000"
     environment:
       - DATABASE_URL=postgresql://mindfactory:mindhash1234@db:5432/newsdb?schema=public
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - NODE_ENV=production
     depends_on:
       - seed

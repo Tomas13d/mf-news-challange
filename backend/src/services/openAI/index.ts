@@ -8,7 +8,7 @@ export const improveText = async (text: string): Promise<string> => {
   const response = await openai.responses.create({
     model: "gpt-4.1",
     instructions:
-      "Eres un asistente que siempre responde en español. Mejora la gramática y ortografía del siguiente texto sin cambiar su significado. Responde solo con el texto corregido.",
+      "Eres un asistente que siempre responde en español. Mejora la gramática, ortografía y la redacción del siguiente texto sin cambiar su significado para que sea una mejor noticia. Responde solo con el texto corregido.",
     input: text,
   });
 

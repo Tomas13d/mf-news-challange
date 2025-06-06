@@ -1,68 +1,105 @@
-import {
-  Box,
-  Modal,
-  Typography,
-  TextField,
-  Button,
-  Grid,
-  IconButton,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormHelperText,
-} from "@mui/material";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
-import CloseIcon from "@mui/icons-material/Close";
-import { useFormik } from "formik";
+import React, { useEffect, useState } from "react";
+import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
-import { createNews, updateNews } from "../services/News";
-import { showSuccess, showError } from "../utils/showAlert";
-import { Categories, News } from "../types/News";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Box,
+  FormHelperText,
+  Select,
+  InputLabel,
+  MenuItem,
+  FormControl,
+} from "@mui/material";
+import { Categories, News } from "@/types/News";
+import { createNews, updateNews } from "@/services/News";
+import { showError, showSuccess } from "@/utils/showAlert";
+import { generateNews, improveText } from "@/services/OpenAI";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
 
-interface NewsModalProps {
+interface Props {
   open: boolean;
-  onClose: () => void;
-  initialData?: Partial<News>;
-  refetch: () => void;
+  handleClose: () => void;
+  handleRefresh: () => void;
+  editingNews?: News | null;
 }
 
-const CATEGORIES: Categories[] = ["NBA", "Fútbol", "Tenis"];
+const createNewsSchema = Yup.object({
+  title: Yup.string().required().min(5).max(100),
+  body: Yup.string().required().min(20),
+  summary: Yup.string().max(250).nullable(),
+  author: Yup.string().required().min(3).max(50),
+  date: Yup.date().required().max(new Date()),
+  category: Yup.string().required().min(3).max(30),
+  imageUrl: Yup.string().url().nullable(),
+});
+
+const CATEGORIES: Categories[] = ["Fútbol", "NBA", "Tenis"] 
 
 export default function CreateEditModal({
   open,
-  onClose,
-  initialData = {},
-  refetch,
-}: NewsModalProps) {
-  const isEditMode = Boolean(initialData?.id);
+  handleClose,
+  handleRefresh,
+  editingNews,
+}: Props) {
+  const [formData, setFormData] = useState({
+    title: "",
+    body: "",
+    summary: "",
+    author: "",
+    date: "",
+    category: "",
+    imageUrl: "",
+  });
+
+  const [isImproving, setIsImproving] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Actualizar solo cuando se abre y hay editingNews
+  useEffect(() => {
+    if (open) {
+      if (editingNews) {
+        setFormData({
+          title: editingNews.title || "",
+          body: editingNews.body || "",
+          summary: editingNews.summary || "",
+          author: editingNews.author || "",
+          date: editingNews.date
+            ? new Date(editingNews.date).toISOString().split("T")[0]
+            : "",
+          category: editingNews.category || "",
+          imageUrl: editingNews.imageUrl || "",
+        });
+      } else {
+        setFormData({
+          title: "",
+          body: "",
+          summary: "",
+          author: "",
+          date: "",
+          category: "",
+          imageUrl: "",
+        });
+      }
+    }
+  }, [open, editingNews]);
+
   const formik = useFormik({
+    initialValues: formData,
     enableReinitialize: true,
-    initialValues: {
-      title: initialData.title || "",
-      body: initialData.body || "",
-      summary: initialData.summary || "",
-      author: initialData.author || "",
-      date: initialData?.date
-        ? new Date(initialData.date).toISOString().split("T")[0]
-        : "",
-      category: initialData.category || "",
-      imageUrl: initialData.imageUrl || "",
-    },
-    validationSchema: Yup.object({
-      title: Yup.string().required("El título es obligatorio"),
-      body: Yup.string().required("El cuerpo es obligatorio"),
-      author: Yup.string().required("El autor es obligatorio"),
-      date: Yup.string().required("La fecha es obligatoria"),
-    }),
-    onSubmit: async (values, { resetForm }) => {
+    validationSchema: createNewsSchema,
+    onSubmit: async (values) => {
       try {
         const valuesWithFormattedDate = {
           ...values,
           date: new Date(values.date).toISOString(),
         };
 
-        if (isEditMode) {
+        if (editingNews) {
           const updatedFields: Partial<News> = {};
 
           (
@@ -71,10 +108,10 @@ export default function CreateEditModal({
             const newValue = valuesWithFormattedDate[key];
             const oldValue =
               key === "date"
-                ? initialData.date
-                  ? new Date(initialData.date).toISOString()
+                ? formData.date
+                  ? new Date(formData.date).toISOString()
                   : ""
-                : initialData[key];
+                : formData[key];
 
             if (newValue !== oldValue) {
               updatedFields[key] = newValue;
@@ -83,69 +120,73 @@ export default function CreateEditModal({
 
           if (Object.keys(updatedFields).length === 0) {
             showSuccess("No hay cambios para actualizar");
-            onClose();
+            handleClose();
             return;
           }
 
-          await updateNews(initialData.id as number, updatedFields);
-          showSuccess("Noticia actualizada correctamente");
-          refetch();
+          await updateNews(editingNews.id, valuesWithFormattedDate);
+          showSuccess("Noticia actualizada con éxito");
         } else {
           await createNews(valuesWithFormattedDate);
-          showSuccess("Noticia creada exitosamente");
-          refetch();
+          showSuccess("Noticia creada con éxito");
         }
-
-        resetForm();
-        onClose();
-      } catch (error) {
-        showError("Ocurrió un error al procesar la noticia");
+        handleRefresh();
+        handleClose();
+      } catch (err) {
+        showError("Error al guardar la noticia");
       }
     },
   });
 
-  const handleImproveBody = () => {
-    showError("Función de AI para mejorar redacción todavía no implementada.");
+  const handleImproveBody = async () => {
+    try {
+      setIsImproving(true);
+      const res = await improveText(formik.values.body);
+      formik.setFieldValue("body", res.improved);
+      setFormData((prev) => ({ ...prev, body: res.improved }));
+    } catch (err) {
+      showError("No se pudo mejorar el texto");
+    } finally {
+      setIsImproving(false);
+    }
   };
 
-  const handleCreateWithAI = () => {
-    showError("Función de AI para crear noticia todavía no implementada.");
+  const handleCreateWithAI = async () => {
+    try {
+      setIsGenerating(true);
+      const generated = await generateNews();
+      const values = {
+        title: generated.title,
+        body: generated.body,
+        summary: generated.summary || "",
+        author: generated.author,
+        date: new Date(generated.date).toISOString().split("T")[0],
+        category: generated.category,
+        imageUrl: generated.imageUrl || "",
+      };
+      setFormData(values);
+      formik.setValues(values);
+    } catch (err) {
+      showError("No se pudo generar la noticia");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <Box
-        component="form"
-        onSubmit={formik.handleSubmit}
-        sx={{
-          width: 500,
-          maxHeight: "90vh",
-          overflowY: "auto",
-          bgcolor: "white",
-          p: 3,
-          mx: "auto",
-          mt: 8,
-          borderRadius: 2,
-          boxShadow: 24,
-          position: "relative",
-        }}
-      >
-        <IconButton
-          onClick={onClose}
-          sx={{ position: "absolute", top: 8, right: 8 }}
-        >
-          <CloseIcon />
-        </IconButton>
-
-        {/* Botón destacado: Crear noticia con AI */}
-        {!isEditMode && (
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+      <DialogTitle>{editingNews ? "Editar" : "Crear"} Noticia</DialogTitle>
+      <DialogContent>
+        {!editingNews?.title && (
           <Box sx={{ display: "flex" }}>
             <Button
-              variant="contained"
+              variant="text"
               onClick={handleCreateWithAI}
+              disabled={isGenerating || isImproving}
               sx={{
                 mb: 1,
                 mt: 3,
+                p:2,
                 ml: "auto",
                 background: "linear-gradient(to right, #00C6FF, #0072FF)",
                 color: "#fff",
@@ -161,145 +202,132 @@ export default function CreateEditModal({
               startIcon={<SmartToyIcon />}
               size="small"
             >
-              Crear noticia con AI
+              {isGenerating ? "Generando..." : "Crear noticia con AI"}
             </Button>
           </Box>
         )}
 
-        <Typography variant="h6" gutterBottom>
-          {initialData?.id ? "Editar noticia" : "Crear noticia"}
-        </Typography>
+        <FormikProvider value={formik}>
+          <form onSubmit={formik.handleSubmit}>
+        {[
+  { name: "title", label: "Título" },
+  { name: "body", label: "Cuerpo", multiline: true, minRows: 4 },
+  {
+    name: "summary",
+    label: "Resumen",
+    multiline: true,
+    minRows: 2,
+  },
+  { name: "author", label: "Autor" },
+  { name: "date", label: "Fecha", type: "date" },
+  { name: "category", label: "Categoría" },
+  { name: "imageUrl", label: "URL de Imagen" },
+].map((field) => {
+  const isBodyField = field.name === "body";
 
-        <Grid container spacing={2}>
-          <Grid size={12}>
-            <TextField
-              label="Título"
-              fullWidth
-              size="small"
-              {...formik.getFieldProps("title")}
-              error={formik.touched.title && Boolean(formik.errors.title)}
-              helperText={formik.touched.title && formik.errors.title}
-            />
-          </Grid>
+  if (field.name === "category") {
+    return (
+      <FormControl
+        key={field.name}
+        fullWidth
+        size="small"
+        margin="normal"
+        error={formik.touched.category && Boolean(formik.errors.category)}
+      >
+        <InputLabel id="category-label">Categoría</InputLabel>
+        <Select
+          labelId="category-label"
+          id="category"
+          label="Categoría"
+          {...formik.getFieldProps("category")}
+          value={formik.values.category}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+        >
+          {CATEGORIES.map((category) => (
+            <MenuItem key={category} value={category}>
+              {category}
+            </MenuItem>
+          ))}
+        </Select>
+        {formik.touched.category && formik.errors.category && (
+          <FormHelperText>{formik.errors.category}</FormHelperText>
+        )}
+      </FormControl>
+    );
+  }
 
-          <Grid size={12}>
-            <Grid size={12}>
-              <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
-                <Button
-                  onClick={handleImproveBody}
-                  startIcon={<SmartToyIcon />}
-                  size="small"
-                  variant="outlined"
-                  sx={{
-                    fontWeight: 500,
-                    textTransform: "none",
-                    borderColor: "#00C6FF",
-                    color: "#0072FF",
-                    transition: "all 0.2s ease-in-out",
-                    "&:hover": {
-                      backgroundColor: "rgba(0, 198, 255, 0.1)",
-                      borderColor: "#0072FF",
-                      color: "#0072FF",
-                    },
-                  }}
-                >
-                  Mejorar con AI
-                </Button>
-              </Box>
+  return (
+    <TextField
+      key={field.name}
+      fullWidth
+      margin="normal"
+      disabled={isGenerating || (isBodyField && isImproving)}
+      label={
+        isGenerating || (isBodyField && isImproving)
+          ? "Generando..."
+          : field.label
+      }
+      type={field.type || "text"}
+      multiline={field.multiline}
+      minRows={field.minRows}
+      {...formik.getFieldProps(field.name)}
+      error={
+        formik.touched[field.name as keyof typeof formik.touched] &&
+        Boolean(formik.errors[field.name as keyof typeof formik.errors])
+      }
+      helperText={
+        formik.touched[field.name as keyof typeof formik.touched] &&
+        formik.errors[field.name as keyof typeof formik.errors]
+      }
+      InputLabelProps={field.name === "date" ? { shrink: true } : undefined}
+      InputProps={{
+        readOnly: isGenerating || (isImproving && isBodyField),
+        endAdornment: isBodyField && (
+          <Button
+            onClick={handleImproveBody}
+            disabled={isImproving || isGenerating}
+            startIcon={<SmartToyIcon />}
+            size="small"
+            variant="text"
+            sx={{
+              ml: 1,
+              p: 1,
+              fontWeight: 500,
+              textTransform: "none",
+              color: "#0072FF",
+              whiteSpace: "nowrap",
+              "&:hover": {
+                backgroundColor: "rgba(0, 198, 255, 0.1)",
+                borderColor: "#0072FF",
+                color: "#0072FF",
+              },
+            }}
+          >
+            Mejorar con AI
+          </Button>
+        ),
+      }}
+    />
+  );
+})}
 
-              <TextField
-                label="Cuerpo de la noticia"
-                fullWidth
-                multiline
-                minRows={4}
-                size="small"
-                {...formik.getFieldProps("body")}
-                error={formik.touched.body && Boolean(formik.errors.body)}
-                helperText={formik.touched.body && formik.errors.body}
-              />
-            </Grid>
-          </Grid>
 
-          <Grid size={12}>
-            <TextField
-              label="Resumen"
-              fullWidth
-              size="small"
-              {...formik.getFieldProps("summary")}
-            />
-          </Grid>
-
-          <Grid size={6}>
-            <TextField
-              label="Autor"
-              fullWidth
-              size="small"
-              {...formik.getFieldProps("author")}
-              error={formik.touched.author && Boolean(formik.errors.author)}
-              helperText={formik.touched.author && formik.errors.author}
-            />
-          </Grid>
-
-          <Grid size={6}>
-            <TextField
-              label="Fecha"
-              type="date"
-              fullWidth
-              size="small"
-              InputLabelProps={{ shrink: true }}
-              {...formik.getFieldProps("date")}
-              error={formik.touched.date && Boolean(formik.errors.date)}
-              helperText={formik.touched.date && formik.errors.date}
-            />
-          </Grid>
-
-        <Grid  size={6}>
-  <FormControl fullWidth size="small" error={formik.touched.category && Boolean(formik.errors.category)}>
-    <InputLabel id="category-label">Categoría</InputLabel>
-    <Select
-      labelId="category-label"
-      id="category"
-      label="Categoría"
-      {...formik.getFieldProps("category")}
-      value={formik.values.category}
-      onChange={formik.handleChange}
-      onBlur={formik.handleBlur}
-    >
-      {CATEGORIES.map((category) => (
-        <MenuItem key={category} value={category}>
-          {category}
-        </MenuItem>
-      ))}
-    </Select>
-    {formik.touched.category && formik.errors.category && (
-      <FormHelperText>{formik.errors.category}</FormHelperText>
-    )}
-  </FormControl>
-</Grid>
-
-          <Grid size={6}>
-            <TextField
-              label="URL de imagen"
-              fullWidth
-              size="small"
-              {...formik.getFieldProps("imageUrl")}
-            />
-          </Grid>
-
-          <Grid size={12}>
-            <Button
-              type="submit"
-              variant="contained"
-              color="success"
-              fullWidth
-              size="small"
-              sx={{ textTransform: "none" }}
-            >
-              Guardar noticia
-            </Button>
-          </Grid>
-        </Grid>
-      </Box>
-    </Modal>
+            <DialogActions>
+              <Button onClick={handleClose} color="inherit">
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={isImproving || isGenerating}
+              >
+                {editingNews ? "Actualizar" : "Crear"}
+              </Button>
+            </DialogActions>
+          </form>
+        </FormikProvider>
+      </DialogContent>
+    </Dialog>
   );
 }

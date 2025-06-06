@@ -18,7 +18,7 @@ export const createNews = async (data: Omit<News, "id">): Promise<News> => {
 };
 
 export const updateNews = async (
-  id: string | number,
+  id: string | Number,
   data: Partial<Omit<News, "id">>
 ): Promise<News> => {
   return handleApiCall(api.patch(`/news/${id}`, data));

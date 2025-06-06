@@ -5,8 +5,8 @@ import openAiRoutes from "./openAI";
 
 const router = Router();
 
+router.use("/openai", openAiRoutes);
 router.use("/news", newsRouter);
 router.use("/auth", authRouters);
-router.use("/open-ai", openAiRoutes);
 
 export default router;

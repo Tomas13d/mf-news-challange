@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import MainArticle from "@/components/main-article";
 import SideNews from "@/components/side-news";
 import NewsCarousel from "@/components/news-carousel";
@@ -32,7 +32,7 @@ export default function Home() {
 
   return (
     <>
-      <CreateEditModal open={isOpen} onClose={closeModal} refetch={refetch} />
+      <CreateEditModal open={isOpen} handleClose={closeModal} handleRefresh={refetch} />
       <Box>
         <Box
           sx={{
