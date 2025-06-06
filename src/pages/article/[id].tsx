@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Container, CircularProgress } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import { useNewsItem } from "@/hooks/useNewsItem";
 import { notFound } from "next/navigation";
 import MainArticle from "@/components/main-article";
@@ -9,13 +9,14 @@ import { useEffect, useState } from "react";
 import { News } from "@/types/News";
 import { getNews } from "@/services/News";
 import { useRouter } from "next/router";
+import { useArticleModal } from "@/context/ArticleModalContext";
+import CreateEditModal from "@/components/create-edit-modal";
 
 export default function ArticlePage() {
   const router = useRouter();
+  const { openModal, closeModal, isOpen } = useArticleModal();
   const { id } = router.query;
   const { newsItem, loading, error, refetch } = useNewsItem(id as string);
-
-
   const [relatedNews, setRelatedNews] = useState<News[]>([]);
 
   useEffect(() => {
@@ -61,16 +62,21 @@ export default function ArticlePage() {
   }
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        bgcolor: "background.default",
-        color: "text.primary",
-      }}
-    >
-      <Container maxWidth="lg" sx={{ flex: 1, py: { xs: 2, md: 4 } }}>
+    <>
+      <CreateEditModal
+        open={isOpen}
+        onClose={closeModal}
+        initialData={newsItem}
+      />
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh",
+          bgcolor: "background.default",
+          color: "text.primary",
+        }}
+      >
         <Box
           sx={{
             display: "grid",
@@ -85,7 +91,7 @@ export default function ArticlePage() {
             <SideNews articles={relatedNews} />
           </Box>
         </Box>
-      </Container>
-    </Box>
+      </Box>
+    </>
   );
 }

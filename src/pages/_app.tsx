@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import "../styles/globals.css";
+import { AuthProvider } from "@/context/useAuth";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,9 +26,11 @@ export default function App({ Component, pageProps }: AppProps) {
     <main className={inter.className}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
+        <AuthProvider>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </AuthProvider>
       </ThemeProvider>
     </main>
   );

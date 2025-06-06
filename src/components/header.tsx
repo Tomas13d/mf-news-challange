@@ -1,131 +1,227 @@
-import type React from "react"
+import React, { useState } from "react";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  Container,
+  IconButton,
+  InputBase,
+  Fade,
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import { useRouter } from "next/router";
+import { useAuth } from "@/context/useAuth";
+import Link from "next/link";
+import { styled, alpha } from "@mui/material/styles";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import CreateEditModal from "./create-edit-modal";
+import { useArticleModal } from "@/context/ArticleModalContext";
 
-import { AppBar, Toolbar, Typography, Button, Box, Container, IconButton, Menu, MenuItem } from "@mui/material"
-import MenuIcon from "@mui/icons-material/Menu"
-import SearchIcon from "@mui/icons-material/Search"
-import { useState } from "react"
-import Link from "next/link"
+const SearchContainer = styled("div")(({ theme }) => ({
+  position: "relative",
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha("#fff", 0.15),
+  marginLeft: theme.spacing(1),
+  width: 0,
+  overflow: "hidden",
+  transition: theme.transitions.create(["width", "padding"], {
+    duration: theme.transitions.duration.standard,
+  }),
+  "&.active": {
+    width: "200px",
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+  },
+}));
 
-const categories = ["Fútbol", "Tenis", "NBA"]
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: "inherit",
+  width: "100%",
+}));
 
 export default function Header() {
-  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null)
+  const router = useRouter();
+  const { user, logout } = useAuth();
+  const isArticlePage = router.pathname === "/article/[id]";
+  const { closeModal, isOpen, openModal } = useArticleModal();
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget)
-  }
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null)
-  }
+  const toggleSearch = () => {
+    setSearchOpen((prev) => !prev);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (search.trim()) {
+      router.push(`/search?q=${search}`);
+    }
+  };
 
   return (
-    <AppBar position="static" sx={{ bgcolor: "#d32f2f" }}>
-      <Container maxWidth="lg">
-        <Toolbar disableGutters>
-          {/* Logo para desktop */}
-          <Typography
-            variant="h6"
-            noWrap
-            component={Link}
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: "none", md: "flex" },
-              fontWeight: 700,
-              color: "inherit",
-              textDecoration: "none",
-            }}
+    <>
+      <CreateEditModal open={isOpen} onClose={closeModal} />
+      <AppBar position="static" sx={{ bgcolor: "#d32f2f" }}>
+        <Container maxWidth="lg">
+          <Toolbar
+            disableGutters
+            sx={{ justifyContent: "space-between", alignItems: "center" }}
           >
-            MFNews
-          </Typography>
-
-          {/* Menú móvil */}
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
+            {/* LOGO */}
+            <Typography
+              variant="h6"
+              noWrap
+              component={Link}
+              href="/"
               sx={{
-                display: { xs: "block", md: "none" },
+                fontWeight: 700,
+                color: "inherit",
+                textDecoration: "none",
               }}
             >
-              {categories.map((category) => (
-                <MenuItem key={category} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{category}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
+              MFNews
+            </Typography>
 
-          {/* Logo para móvil */}
-          <Typography
-            variant="h5"
-            noWrap
-            component={Link}
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: "flex", md: "none" },
-              flexGrow: 1,
-              fontWeight: 700,
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            MFNews
-          </Typography>
+            {/* ACCIONES */}
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Box
+                component="form"
+                onSubmit={handleSearchSubmit}
+                sx={{ display: "flex", alignItems: "center" }}
+              >
+                <IconButton sx={{ color: "white" }} onClick={toggleSearch}>
+                  <SearchIcon />
+                </IconButton>
+                <SearchContainer className={searchOpen ? "active" : ""}>
+                  <StyledInputBase
+                    placeholder="Buscar…"
+                    inputProps={{ "aria-label": "buscar" }}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    autoFocus={searchOpen}
+                  />
+                </SearchContainer>
+              </Box>
 
-          {/* Menú desktop */}
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {categories.map((category) => (
-              <Button key={category} onClick={handleCloseNavMenu} sx={{ my: 2, color: "white", display: "block" }}>
-                {category}
-              </Button>
-            ))}
-          </Box>
-
-          {/* Botón de búsqueda */}
-          <Box sx={{ flexGrow: 0 }}>
-            <IconButton sx={{ color: "white" }}>
-              <SearchIcon />
-            </IconButton>
-            <Button
-              variant="contained"
-              color="secondary"
-              sx={{
-                ml: 1,
-                bgcolor: "white",
-                color: "#d32f2f",
-                "&:hover": {
-                  bgcolor: "#f5f5f5",
-                },
-              }}
-            >
-              Nueva Noticia
-            </Button>
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
-  )
+              {user ? (
+                isArticlePage ? (
+                  <>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<EditIcon />}
+                      sx={{
+                        ml: 2,
+                        color: "white",
+                        borderColor: "white",
+                        "&:hover": {
+                          bgcolor: "rgba(255,255,255,0.1)",
+                        },
+                      }}
+                      onClick={() => {
+                        const id = router.query.id;
+                        openModal();
+                      }}
+                    >
+                      Editar Noticia
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      startIcon={<DeleteIcon />}
+                      sx={{
+                        ml: 1,
+                        bgcolor: "white",
+                        color: "red",
+                        "&:hover": {
+                          bgcolor: "#f5f5f5",
+                          color: "#b71c1c",
+                        },
+                      }}
+                      onClick={() => {
+                        const confirm = window.confirm(
+                          "¿Estás seguro que quieres eliminar esta noticia?"
+                        );
+                        if (confirm) {
+                          const id = router.query.id;
+                          // Lógica deleteArticle(id)
+                        }
+                      }}
+                    >
+                      Eliminar
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                   <Button
+                      variant="text"
+                      color="secondary"
+                      sx={{
+                        ml: 2,
+                        color: "white",
+                      }}
+                      onClick={logout}
+                    >
+                      logout
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="secondary"
+                      sx={{
+                        ml: 2,
+                        bgcolor: "white",
+                        color: "#d32f2f",
+                        "&:hover": {
+                          bgcolor: "#f5f5f5",
+                        },
+                      }}
+                      onClick={() => openModal()}
+                    >
+                      Nueva Noticia
+                    </Button>
+                   
+                  </>
+                )
+              ) : (
+                <>
+                  <Button
+                    variant="text"
+                    color="secondary"
+                    sx={{
+                      ml: 2,
+                      color: "white",
+                    }}
+                    onClick={() => router.push("/register")}
+                  >
+                    Sing in
+                  </Button>
+                  <Button
+                    disableElevation
+                    variant="contained"
+                    color="secondary"
+                    sx={{
+                      ml: 2,
+                      bgcolor: "white",
+                      color: "#d32f2f",
+                      "&:hover": {
+                        bgcolor: "#f5f5f5",
+                      },
+                    }}
+                    onClick={() => router.push("/login")}
+                  >
+                    Login
+                  </Button>
+                </>
+              )}
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
+    </>
+  );
 }
