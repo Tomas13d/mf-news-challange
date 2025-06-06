@@ -1,10 +1,11 @@
-import { Box, CircularProgress } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import MainArticle from "@/components/main-article";
 import SideNews from "@/components/side-news";
 import NewsCarousel from "@/components/news-carousel";
 import { useNews } from "@/hooks/useNews";
 import CreateEditModal from "@/components/create-edit-modal";
 import { useArticleModal } from "@/context/ArticleModalContext";
+import NoNews from "@/components/no-news";
 
 export default function Home() {
   const { news, loading, refetch } = useNews({});
@@ -23,6 +24,10 @@ export default function Home() {
         <CircularProgress size={48} />
       </Box>
     );
+  }
+
+  if (!news || news.length === 0) {
+    return <NoNews/>
   }
 
   return (
@@ -52,3 +57,4 @@ export default function Home() {
     </>
   );
 }
+

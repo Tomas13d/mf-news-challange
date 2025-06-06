@@ -7,6 +7,7 @@ import { useArticleModal } from "@/context/ArticleModalContext";
 import CreateEditModal from "@/components/create-edit-modal";
 import { useNews } from "@/hooks/useNews";
 import { useRouter } from "next/router";
+import NoNews from "@/components/no-news";
 
 export default function ArticlePage() {
   const router = useRouter();
@@ -29,6 +30,10 @@ export default function ArticlePage() {
         <CircularProgress size={48} />
       </Box>
     );
+  }
+
+   if (!news || news.length === 0) {
+    return <NoNews/>
   }
 
   return (

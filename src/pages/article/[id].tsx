@@ -11,6 +11,7 @@ import { getNewsByCategory } from "@/services/News";
 import { useRouter } from "next/router";
 import { useArticleModal } from "@/context/ArticleModalContext";
 import CreateEditModal from "@/components/create-edit-modal";
+import NoNews from "@/components/no-news";
 
 export default function ArticlePage() {
   const router = useRouter();
@@ -51,7 +52,7 @@ export default function ArticlePage() {
   }
 
   if (!newsItem || error) {
-    notFound();
+    return <NoNews />;
   }
 
   return (
