@@ -35,7 +35,7 @@ export const getNewsByCategory = (category: string) =>
     },
   });
 
-// Buscar noticias por título o autor
+// Buscar noticias por título, autor o categoría
 export const searchNews = (query: string) =>
   prisma.news.findMany({
     where: {

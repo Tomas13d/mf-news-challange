@@ -6,6 +6,5 @@ const router = Router();
 
 router.use("/news", newsRouter);
 router.use("/auth", authRouters);
-// More routes ...
 
 export default router;
