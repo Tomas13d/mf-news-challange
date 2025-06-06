@@ -1,10 +1,8 @@
 import { Router } from "express";
 import * as NewsController from "../../controllers/news";
 import { authenticate } from "../../middleware/authMiddleware";
-import prisma from "../../prisma/client";
 
 const router = Router();
-
 router.get("/search", NewsController.search);
 router.get("/category/:category", NewsController.getByCategory);
 
