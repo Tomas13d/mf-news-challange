@@ -58,7 +58,7 @@ export function useNewsItem(id: string | number) {
   };
 
   useEffect(() => {
-    fetchNews();
+    if(id) fetchNews();
   }, [id]);
 
   return {

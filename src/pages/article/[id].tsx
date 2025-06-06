@@ -1,13 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import { useNewsItem } from "@/hooks/useNewsItem";
 import { notFound } from "next/navigation";
 import MainArticle from "@/components/main-article";
 import SideNews from "@/components/side-news";
-import { useEffect, useState } from "react";
 import { News } from "@/types/News";
-import { getNews } from "@/services/News";
+import { getNewsByCategory } from "@/services/News";
 import { useRouter } from "next/router";
 import { useArticleModal } from "@/context/ArticleModalContext";
 import CreateEditModal from "@/components/create-edit-modal";
@@ -24,15 +24,8 @@ export default function ArticlePage() {
       if (!newsItem) return;
 
       try {
-        const allNews = await getNews();
-        const related = allNews
-          .filter(
-            (item) =>
-              item.id !== newsItem.id &&
-              item.category.toLowerCase() === newsItem.category.toLowerCase()
-          )
-          .slice(0, 3);
-
+        const allNews = await getNewsByCategory(newsItem.category);
+        const related = allNews.filter((n) => n.id !== newsItem.id).slice(0, 3);
         setRelatedNews(related);
       } catch (err) {
         console.error("Error loading related news:", err);

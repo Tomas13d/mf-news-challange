@@ -1,13 +1,19 @@
+"use client";
+
 import { Box, CircularProgress } from "@mui/material";
 import MainArticle from "@/components/main-article";
 import SideNews from "@/components/side-news";
-import NewsCarousel from "@/components/news-carousel";
-import { useNews } from "@/hooks/useNews";
-import CreateEditModal from "@/components/create-edit-modal";
 import { useArticleModal } from "@/context/ArticleModalContext";
+import CreateEditModal from "@/components/create-edit-modal";
+import { useNews } from "@/hooks/useNews";
+import { useRouter } from "next/router";
 
-export default function Home() {
-  const { news, loading, refetch } = useNews({});
+export default function ArticlePage() {
+  const router = useRouter();
+  const { id: category } = router.query;
+  const { news, loading, refetch } = useNews({
+    category: category as string,
+  });
   const { closeModal, isOpen } = useArticleModal();
 
   if (loading) {
@@ -43,10 +49,6 @@ export default function Home() {
           <Box>
             <SideNews articles={news.slice(1, 4)} />
           </Box>
-        </Box>
-
-        <Box>
-          <NewsCarousel articles={news.slice(4, 10)} />
         </Box>
       </Box>
     </>

@@ -9,3 +9,5 @@ export interface News {
   category: string;
   summary: string;
 }
+
+export type Categories = "NBA" | "Fútbol" | "Tenis";
