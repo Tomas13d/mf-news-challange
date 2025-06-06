@@ -15,4 +15,6 @@ model News {
   imageUrl  String
   author    String
   date      DateTime
+  category  String
+  summary   String
 }
