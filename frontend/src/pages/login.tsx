@@ -12,6 +12,8 @@ import {
 } from "@mui/material";
 import { useAuth } from "@/context/useAuth";
 import NextLink from "next/link";
+import { showError } from "@/utils/showAlert";
+import { ApiError } from "@/services/api";
 
 export default function LoginForm() {
   const { login } = useAuth();
@@ -45,7 +47,12 @@ export default function LoginForm() {
             try {
               await login(values.email, values.password);
             } catch (err: any) {
-              setErrors({ email: "Credenciales inválidas" });
+              if (err instanceof ApiError) {
+                showError("Error de inicio de sesión", err.message);
+                setErrors({ email: err.message });
+              } else {
+                showError("Error desconocido", "Ocurrió un error inesperado");
+              }
             } finally {
               setSubmitting(false);
             }

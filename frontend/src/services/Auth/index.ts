@@ -6,7 +6,7 @@ interface AuthResponse {
   token: string;
 }
 
-export const login = async (email: string, password: string) => {
+export const loginReq = async (email: string, password: string) => {
   return handleApiCall(
     api.post<AuthResponse>("/auth/login", {
       email,
@@ -15,7 +15,7 @@ export const login = async (email: string, password: string) => {
   );
 };
 
-export const register = async (
+export const registerReq = async (
   name: string,
   email: string,
   password: string

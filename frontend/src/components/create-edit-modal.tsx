@@ -6,6 +6,11 @@ import {
   Button,
   Grid,
   IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
 } from "@mui/material";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import CloseIcon from "@mui/icons-material/Close";
@@ -13,7 +18,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createNews, updateNews } from "../services/News";
 import { showSuccess, showError } from "../utils/showAlert";
-import { News } from "../types/News";
+import { Categories, News } from "../types/News";
 
 interface NewsModalProps {
   open: boolean;
@@ -21,6 +26,8 @@ interface NewsModalProps {
   initialData?: Partial<News>;
   refetch: () => void;
 }
+
+const CATEGORIES: Categories[] = ["NBA", "Fútbol", "Tenis"];
 
 export default function CreateEditModal({
   open,
@@ -246,14 +253,29 @@ export default function CreateEditModal({
             />
           </Grid>
 
-          <Grid size={6}>
-            <TextField
-              label="Categoría"
-              fullWidth
-              size="small"
-              {...formik.getFieldProps("category")}
-            />
-          </Grid>
+        <Grid  size={6}>
+  <FormControl fullWidth size="small" error={formik.touched.category && Boolean(formik.errors.category)}>
+    <InputLabel id="category-label">Categoría</InputLabel>
+    <Select
+      labelId="category-label"
+      id="category"
+      label="Categoría"
+      {...formik.getFieldProps("category")}
+      value={formik.values.category}
+      onChange={formik.handleChange}
+      onBlur={formik.handleBlur}
+    >
+      {CATEGORIES.map((category) => (
+        <MenuItem key={category} value={category}>
+          {category}
+        </MenuItem>
+      ))}
+    </Select>
+    {formik.touched.category && formik.errors.category && (
+      <FormHelperText>{formik.errors.category}</FormHelperText>
+    )}
+  </FormControl>
+</Grid>
 
           <Grid size={6}>
             <TextField

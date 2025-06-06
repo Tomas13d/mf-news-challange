@@ -1,12 +1,13 @@
-"use client"
+"use client";
 
-import { Paper, Typography, Box, Chip, Divider } from "@mui/material"
-import Image from "next/image"
-import { News } from "@/types/News"
-import { formatDate } from "@/utils/formatDate"
+import { Paper, Typography, Box, Chip, Divider } from "@mui/material";
+import Image from "next/image";
+import { News } from "@/types/News";
+import { formatDate } from "@/utils/formatDate";
+import { OptimizedImage } from "./optimazed-image";
 
 interface MainArticleProps {
-  article: News
+  article: News;
 }
 
 export default function MainArticle({ article }: MainArticleProps) {
@@ -29,22 +30,24 @@ export default function MainArticle({ article }: MainArticleProps) {
       </Box>
 
       <Box sx={{ position: "relative", width: "100%", height: 400, mb: 2 }}>
-        <Image
-          src={article.imageUrl || "/placeholder.svg"}
-          alt={article.title}
-          fill
-          style={{ objectFit: "cover" }}
-          priority
-        />
+        <OptimizedImage src={article.imageUrl} alt={article.title} priority />
       </Box>
-
       <Box
-        sx={{ display: "flex", justifyContent: "space-between", mb: 2, color: "text.secondary", fontSize: "0.875rem" }}
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          mb: 2,
+          color: "text.secondary",
+          fontSize: "0.875rem",
+        }}
       >
         <Typography variant="caption">
-          Compartir, enviar o guardar: use los iconos compartir, correo o marcador
+          Compartir, enviar o guardar: use los iconos compartir, correo o
+          marcador
         </Typography>
-        <Typography variant="caption">Actualizado: {formatDate(article.date)}</Typography>
+        <Typography variant="caption">
+          Actualizado: {formatDate(article.date)}
+        </Typography>
       </Box>
 
       <Divider sx={{ mb: 2 }} />
@@ -55,5 +58,5 @@ export default function MainArticle({ article }: MainArticleProps) {
 
       <Typography variant="body1">{article.body}</Typography>
     </Paper>
-  )
+  );
 }

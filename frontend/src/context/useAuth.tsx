@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { login as loginReq, register as registerReq } from "../services/Auth";
+import { loginReq, registerReq } from "../services/Auth";
 import { User } from "../types/User";
 import { useRouter } from "next/router";
 import { closeAlert, showError, showSuccess } from "@/utils/showAlert";
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       router.push("/");
     } catch (err) {
       showError("Error de inicio de sesión", "Credenciales incorrectas");
-      throw err;
+      return;
     }
   };
 
