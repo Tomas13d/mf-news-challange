@@ -8,7 +8,12 @@ type OptimizedImageProps = Omit<ImageProps, "fill"> & {
 };
 
 // imagen optimizada con NEXT
-export const OptimizedImage = ({ src, alt, priority = false, ...props }: OptimizedImageProps) => {
+export const OptimizedImage = ({
+  src,
+  alt,
+  priority = false,
+  ...props
+}: OptimizedImageProps) => {
   return (
     <NextImage
       src={src || "/placeholder.svg"}
