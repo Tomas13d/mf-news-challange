@@ -2,8 +2,8 @@
 
 import { Paper, Typography, Box, Chip, Divider } from "@mui/material"
 import Image from "next/image"
-import { formatDate } from "@/lib/utils"
 import { News } from "@/types/News"
+import { formatDate } from "@/utils/formatDate"
 
 interface MainArticleProps {
   article: News

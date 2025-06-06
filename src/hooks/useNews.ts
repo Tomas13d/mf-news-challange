@@ -59,7 +59,7 @@ export function useNews({ category }: { category?: string }) {
 
   useEffect(() => {
     loadAll();
-  }, [category]); // se recarga cada vez que cambie category
+  }, [category]); 
 
   return {
     news,

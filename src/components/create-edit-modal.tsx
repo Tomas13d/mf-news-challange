@@ -50,7 +50,6 @@ export default function CreateEditModal({
     }),
     onSubmit: async (values, { resetForm }) => {
       try {
-        // Convertir fecha a ISO
         const valuesWithFormattedDate = {
           ...values,
           date: new Date(values.date).toISOString(),

@@ -26,7 +26,7 @@ export default function Footer() {
             alignItems: "start",
           }}
         >
-          {/* MFNews info */}
+         
           <Box>
             <Typography variant="h6" gutterBottom>
               MFNews
@@ -37,7 +37,7 @@ export default function Footer() {
             </Typography>
           </Box>
 
-          {/* Contacto */}
+    
           <Box>
             <Typography variant="h6" gutterBottom>
               Contacto
@@ -48,7 +48,7 @@ export default function Footer() {
             <Typography variant="body2">Teléfono: +34 123 456 789</Typography>
           </Box>
 
-          {/* Redes: empujada más a la derecha */}
+    
           <Box
             sx={{
               justifySelf: { sm: "end" },

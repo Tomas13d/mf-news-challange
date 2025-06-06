@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -26,18 +26,6 @@ import { deleteNews } from "@/services/News";
 import { Categories } from "@/types/News";
 import MoreIcon from "@mui/icons-material/MoreVert";
 
-const SearchContainer = styled("div")(({ theme }) => ({
-  position: "relative",
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginLeft: theme.spacing(2),
-  width: "100%",
-  maxWidth: 300,
-}));
-
 const categories: Categories[] = ["Fútbol", "NBA", "Tenis"];
 
 export default function Header() {
@@ -48,20 +36,10 @@ export default function Header() {
   const { openModal } = useArticleModal();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
     React.useState<null | HTMLElement>(null);
 
-  const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
-    setAnchorEl(null);
-  };
 
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMobileMoreAnchorEl(event.currentTarget);
@@ -302,7 +280,9 @@ export default function Header() {
               MFNews
             </Typography>
 
-            <Box sx={{ display: { xs: "none", md: "flex" }, gap: 3, mr: 2, ml:2 }}>
+            <Box
+              sx={{ display: { xs: "none", md: "flex" }, gap: 3, mr: 2, ml: 2 }}
+            >
               {categories.map((category) => (
                 <Link
                   key={category}

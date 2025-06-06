@@ -49,7 +49,7 @@ export function useNewsItem(id: string | number) {
     setError(null);
     try {
       await deleteNews(id);
-      setNewsItem(null); // Se eliminó correctamente
+      setNewsItem(null);
     } catch (err) {
       handleError(err);
     } finally {
